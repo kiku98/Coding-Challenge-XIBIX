@@ -15,5 +15,14 @@
   "bugs": {
     "url": "https://github.com/kiku98/Coding-Challenge-XIBIX/issues"
   },
-  "homepage": "https://github.com/kiku98/Coding-Challenge-XIBIX#readme"
+  "homepage": "https://github.com/kiku98/Coding-Challenge-XIBIX#readme",
+  "devDependencies": {
+    "eslint": "^8.20.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-n": "^15.2.4",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-promise": "^6.0.0"
+  }
 }
