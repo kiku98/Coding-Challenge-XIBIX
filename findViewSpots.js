@@ -1,9 +1,11 @@
 function findViewSpots(file) {
   // read our data from our file
   const data = require(file);
+  const values = data.values;
+  const elements = data.elements;
 
   // sort all values descending regarding their height
-  data.values.sort(function (x, y) {
+  values.sort(function (x, y) {
     if (x.value < y.value) {
       return 1;
     }
@@ -14,31 +16,29 @@ function findViewSpots(file) {
   });
 
   // go through all sorted values
-  data.values.forEach((face) => {
+  values.forEach((face) => {
     // if the actual faces IsViewPort-Property is undefinied
     // --> set it to be a Viewpoint (as it is the "next" heighest face)
     if (face.isViewPoint === undefined) {
       face.isViewPoint = true;
       // get all 3 related nodes from elements
-      const nodes = data.elements[face.element_id].nodes;
+      const verticesOfFace = elements[face.element_id].nodes;
 
       // find all elements, that contain one of these nodes
       // and set them to in "values" to isViewPort == False
-      data.elements.forEach((faceH, indexH) => {
+      elements.forEach((faceH, indexH) => {
         if (
-          faceH.nodes.includes(nodes[0]) ||
-          faceH.nodes.includes(nodes[1]) ||
-          faceH.nodes.includes(nodes[2])
+          faceH.nodes.includes(verticesOfFace[0]) ||
+          faceH.nodes.includes(verticesOfFace[1]) ||
+          faceH.nodes.includes(verticesOfFace[2])
         ) {
-          const found = data.values.find(
-            (value) => value.element_id === indexH
-          );
+          const found = values.find((value) => value.element_id === indexH);
           if (found.isViewPoint === undefined) found.isViewPoint = false;
         }
       });
     }
   });
-  const result = data.values.filter((value) => value.isViewPoint === true);
+  const result = values.filter((value) => value.isViewPoint === true);
   result.forEach((element) => delete element.isViewPoint);
 }
 
