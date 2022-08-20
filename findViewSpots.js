@@ -40,18 +40,19 @@ function findViewSpots(file) {
   });
   const result = values.filter((value) => value.isViewPoint === true);
   result.forEach((element) => delete element.isViewPoint);
+  console.log(result);
 }
 
 const start = Date.now();
 
-findViewSpots("./data/mesh_x_sin_cos_10000.json");
+findViewSpots("./data/mesh.json");
 
 const end = Date.now();
 console.log(`Execution time: ${end - start} ms`);
 
-const start2 = Date.now();
+// const start2 = Date.now();
 
-findViewSpots("./data/mesh_x_sin_cos_20000.json");
+// findViewSpots("./data/mesh_x_sin_cos_20000.json");
 
-const end2 = Date.now();
-console.log(`Execution time: ${end2 - start2} ms`);
+// const end2 = Date.now();
+// console.log(`Execution time: ${end2 - start2} ms`);
