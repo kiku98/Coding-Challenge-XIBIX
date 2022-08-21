@@ -1,10 +1,10 @@
-function findViewSpots(file, number) {
+function findViewSpots(file, noOfViewpoints) {
   // read our data from our file
   const data = require(file);
   const values = data.values;
   const elements = data.elements;
 
-  let noOfViewpoints = 0;
+  let foundViewpoints = 0;
 
   // sort all values descending regarding their height and append its node
   // and the isViewPort property
@@ -23,13 +23,17 @@ function findViewSpots(file, number) {
   });
 
   // iterate over all sorted faces
-  for (let index = 0; index < values.length; index++) {
+  for (
+    let index = 0;
+    index < values.length && foundViewpoints !== noOfViewpoints;
+    index++
+  ) {
     const face = values[index];
     if (face.isViewPoint == null) {
       // assume the next highets face is a ViewPoint. It will be changed to no Viewport,
       // if we find in the inner loop a bigger, connecting face, that is already no Viewport
       face.isViewPoint = true;
-      noOfViewpoints++;
+      foundViewpoints++;
       const nodesOfFace = face.nodes;
 
       // loop through all faces to compare them to the actual
@@ -47,7 +51,7 @@ function findViewSpots(file, number) {
             // and they have a node in common, the actual face is no VP
             if (face.isViewPoint && indexCompare < index) {
               face.isViewPoint = false;
-              noOfViewpoints--;
+              foundViewpoints--;
             }
             // If our compared face is smaller (:=index is higher) than our actual face
             // and they have a node in common, the compared face is no VP
@@ -56,11 +60,6 @@ function findViewSpots(file, number) {
             }
           }
         }
-      }
-
-      // if we have found enough Viewpoints break the loop
-      if (noOfViewpoints === number) {
-        break;
       }
     }
   }
@@ -82,8 +81,9 @@ function findViewSpots(file, number) {
 
 const start = Date.now();
 
-// findViewSpots("./data/mesh.json", 5);
-findViewSpots("./data/mesh_x_sin_cos_10000.json", 15);
+// const result = findViewSpots("./data/mesh.json", 5);
+const result = findViewSpots("./data/mesh_x_sin_cos_20000.json", 15);
+console.log(result);
 
 const end = Date.now();
 console.log(`Execution time: ${end - start} ms`);
