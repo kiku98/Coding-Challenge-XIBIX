@@ -1,11 +1,16 @@
-function findViewSpots(file) {
+function findViewSpots(file, number) {
   // read our data from our file
   const data = require(file);
   const values = data.values;
   const elements = data.elements;
 
-  // sort all values descending regarding their height
+  // sort all values descending regarding their height and append its node
+  // and the isViewPort property
   values.sort(function (x, y) {
+    if (x.nodes === undefined) x.nodes = elements[x.element_id].nodes;
+    if (x.isViewPoint === undefined) x.isViewPoint = null;
+    if (y.nodes === undefined) y.nodes = elements[y.element_id].nodes;
+    if (y.isViewPoint === undefined) y.isViewPoint = null;
     if (x.value < y.value) {
       return 1;
     }
@@ -15,45 +20,56 @@ function findViewSpots(file) {
     return 0;
   });
 
-  // go through all sorted values
-  values.forEach((face) => {
-    // if the actual faces IsViewPort-Property is undefinied
+  let foundViewPointCounter = 0;
+  // iterate over all sorted faces
+  values.every(function (face) {
+    // if the actual faces IsViewPort-Property is null
     // --> set it to be a Viewpoint (as it is the "next" heighest face)
-    if (face.isViewPoint === undefined) {
+    // but only if it has no surrounding elements that are higher itself but are no
+    // viewport
+    if (face.isViewPoint === null) {
       face.isViewPoint = true;
+      foundViewPointCounter++;
       // get all 3 related nodes from elements
-      const verticesOfFace = elements[face.element_id].nodes;
-
+      const nodesOfFace = face.nodes;
       // find all elements, that contain one of these nodes
       // and set them to in "values" to isViewPort == False
-      elements.forEach((faceH, indexH) => {
+      values.forEach((faceH) => {
         if (
-          faceH.nodes.includes(verticesOfFace[0]) ||
-          faceH.nodes.includes(verticesOfFace[1]) ||
-          faceH.nodes.includes(verticesOfFace[2])
+          face.isViewPoint === true &&
+          (faceH.nodes.includes(nodesOfFace[0]) ||
+            faceH.nodes.includes(nodesOfFace[1]) ||
+            faceH.nodes.includes(nodesOfFace[2]))
         ) {
-          const found = values.find((value) => value.element_id === indexH);
-          if (found.isViewPoint === undefined) found.isViewPoint = false;
+          if (faceH.isViewPoint === false && faceH.value > face.value) {
+            face.isViewPoint = false;
+            foundViewPointCounter--;
+            return;
+          }
+          if (faceH.isViewPoint === null) faceH.isViewPoint = false;
         }
       });
     }
+    if (foundViewPointCounter === number) return false;
+    else return true;
   });
   const result = values.filter((value) => value.isViewPoint === true);
-  result.forEach((element) => delete element.isViewPoint);
+  result.forEach((element) => {
+    delete element.isViewPoint;
+    delete element.nodes;
+  });
   console.log(result);
   console.log(result.length);
 }
 
+process.argv.forEach(function (val, index, array) {
+  console.log(index + ": " + val);
+});
+
 const start = Date.now();
 
-findViewSpots("./data/mesh.json");
+// findViewSpots("./data/mesh.json", 5);
+findViewSpots("./data/mesh_x_sin_cos_20000.json");
 
 const end = Date.now();
 console.log(`Execution time: ${end - start} ms`);
-
-// const start2 = Date.now();
-
-// findViewSpots("./data/mesh_x_sin_cos_20000.json");
-
-// const end2 = Date.now();
-// console.log(`Execution time: ${end2 - start2} ms`);
