@@ -4,6 +4,8 @@ function findViewSpots(file, number) {
   const values = data.values;
   const elements = data.elements;
 
+  let noOfViewpoints = 0;
+
   // sort all values descending regarding their height and append its node
   // and the isViewPort property
   values.sort(function (x, y) {
@@ -24,16 +26,13 @@ function findViewSpots(file, number) {
   for (let index = 0; index < values.length; index++) {
     const face = values[index];
     if (face.isViewPoint == null) {
+      // assume the next highets face is a ViewPoint. It will be changed to no Viewport,
+      // if we find in the inner loop a bigger, connecting face, that is already no Viewport
       face.isViewPoint = true;
-      // get all 3 related nodes from elements
+      noOfViewpoints++;
       const nodesOfFace = face.nodes;
-      // find all elements, that contain one of these nodes
-      // and set them to in "values" to isViewPort == False
-      // console.log(nodesOfFace);
-      if (face.element_id === 0) {
-        console.log(nodesOfFace);
-        console.log("k");
-      }
+
+      // loop through all faces to compare them to the actual
       for (let indexCompare = 0; indexCompare < values.length; indexCompare++) {
         if (indexCompare !== index) {
           const faceCompare = values[indexCompare];
@@ -44,21 +43,37 @@ function findViewSpots(file, number) {
             compareNodes.includes(nodesOfFace[1]) ||
             compareNodes.includes(nodesOfFace[2])
           ) {
-            if (indexCompare > index) faceCompare.isViewPoint = false;
-            // der vergleich ist grösser und kein VP, dann ist der auch keins
-            if (indexCompare < index) {
-              console.log(faceCompare.isViewPoint);
+            // If our compared face is bigger (:=index is smaller) than our actual face
+            // and they have a node in common, the actual face is no VP
+            if (face.isViewPoint && indexCompare < index) {
               face.isViewPoint = false;
+              noOfViewpoints--;
+            }
+            // If our compared face is smaller (:=index is higher) than our actual face
+            // and they have a node in common, the compared face is no VP
+            if (indexCompare > index) {
+              faceCompare.isViewPoint = false;
             }
           }
         }
       }
+
+      // if we have found enough Viewpoints break the loop
+      if (noOfViewpoints === number) {
+        break;
+      }
     }
   }
 
+  // filter the results to only show faces, that are a ViewPoint and remove the keys "isViewPoint"
+  // and "nodes"
   const result = values.filter((value) => value.isViewPoint === true);
-  console.log(result);
-  console.log(result.length);
+  result.forEach((element) => {
+    delete element.isViewPoint;
+    delete element.nodes;
+  });
+
+  return result;
 }
 
 // process.argv.forEach(function (val, index, array) {
@@ -67,8 +82,8 @@ function findViewSpots(file, number) {
 
 const start = Date.now();
 
-findViewSpots("./data/mesh.json", 5);
-// findViewSpots("./data/mesh_x_sin_cos_20000.json");
+// findViewSpots("./data/mesh.json", 5);
+findViewSpots("./data/mesh_x_sin_cos_10000.json", 15);
 
 const end = Date.now();
 console.log(`Execution time: ${end - start} ms`);
