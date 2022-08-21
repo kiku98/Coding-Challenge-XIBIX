@@ -20,56 +20,55 @@ function findViewSpots(file, number) {
     return 0;
   });
 
-  let foundViewPointCounter = 0;
   // iterate over all sorted faces
-  values.every(function (face) {
-    // if the actual faces IsViewPort-Property is null
-    // --> set it to be a Viewpoint (as it is the "next" heighest face)
-    // but only if it has no surrounding elements that are higher itself but are no
-    // viewport
-    if (face.isViewPoint === null) {
+  for (let index = 0; index < values.length; index++) {
+    const face = values[index];
+    if (face.isViewPoint == null) {
       face.isViewPoint = true;
-      foundViewPointCounter++;
       // get all 3 related nodes from elements
       const nodesOfFace = face.nodes;
       // find all elements, that contain one of these nodes
       // and set them to in "values" to isViewPort == False
-      values.forEach((faceH) => {
-        if (
-          face.isViewPoint === true &&
-          (faceH.nodes.includes(nodesOfFace[0]) ||
-            faceH.nodes.includes(nodesOfFace[1]) ||
-            faceH.nodes.includes(nodesOfFace[2]))
-        ) {
-          if (faceH.isViewPoint === false && faceH.value > face.value) {
-            face.isViewPoint = false;
-            foundViewPointCounter--;
-            return;
+      // console.log(nodesOfFace);
+      if (face.element_id === 0) {
+        console.log(nodesOfFace);
+        console.log("k");
+      }
+      for (let indexCompare = 0; indexCompare < values.length; indexCompare++) {
+        if (indexCompare !== index) {
+          const faceCompare = values[indexCompare];
+          const compareNodes = faceCompare.nodes;
+
+          if (
+            compareNodes.includes(nodesOfFace[0]) ||
+            compareNodes.includes(nodesOfFace[1]) ||
+            compareNodes.includes(nodesOfFace[2])
+          ) {
+            if (indexCompare > index) faceCompare.isViewPoint = false;
+            // der vergleich ist grösser und kein VP, dann ist der auch keins
+            if (indexCompare < index) {
+              console.log(faceCompare.isViewPoint);
+              face.isViewPoint = false;
+            }
           }
-          if (faceH.isViewPoint === null) faceH.isViewPoint = false;
         }
-      });
+      }
     }
-    if (foundViewPointCounter === number) return false;
-    else return true;
-  });
+  }
+
   const result = values.filter((value) => value.isViewPoint === true);
-  result.forEach((element) => {
-    delete element.isViewPoint;
-    delete element.nodes;
-  });
   console.log(result);
   console.log(result.length);
 }
 
-process.argv.forEach(function (val, index, array) {
-  console.log(index + ": " + val);
-});
+// process.argv.forEach(function (val, index, array) {
+//   console.log(index + ": " + val);
+// });
 
 const start = Date.now();
 
-// findViewSpots("./data/mesh.json", 5);
-findViewSpots("./data/mesh_x_sin_cos_20000.json");
+findViewSpots("./data/mesh.json", 5);
+// findViewSpots("./data/mesh_x_sin_cos_20000.json");
 
 const end = Date.now();
 console.log(`Execution time: ${end - start} ms`);
