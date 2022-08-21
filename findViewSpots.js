@@ -15,13 +15,13 @@ function findViewSpots(data, noOfViewpoints) {
     if (x.value < y.value) {
       if (checkIfArraysHaveOneSameElement(x.nodes, y.nodes)) {
         x.isViewPoint = false;
-        y.isViewPoint = null;
+        if (y.isViewPoint !== false) y.isViewPoint = null;
       }
       return 1;
     }
     if (x.value > y.value) {
       if (checkIfArraysHaveOneSameElement(x.nodes, y.nodes)) {
-        x.isViewPoint = null;
+        if (x.isViewPoint !== false) x.isViewPoint = null;
         y.isViewPoint = false;
       }
       return -1;
