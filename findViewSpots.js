@@ -1,29 +1,26 @@
-function checkIfOneSameEdge(x, y) {
-  return x.includes(y[0]) || x.includes(y[1]) || x.includes(y[2]);
-}
-
-function findViewSpots(file, noOfViewpoints) {
-  // read our data from our file
-  const data = require(file);
+function findViewSpots(data, noOfViewpoints) {
   const values = data.values;
   const elements = data.elements;
 
   let foundViewpoints = 0;
 
-  // sort all values descending regarding their height and append its node
+  function checkIfArraysHaveOneSameElement(x, y) {
+    return x.includes(y[0]) || x.includes(y[1]) || x.includes(y[2]);
+  }
+  // sort all values descending regarding their height and append its nodes
   // and the isViewPort property
   values.sort(function (x, y) {
     if (x.nodes === undefined) x.nodes = elements[x.element_id].nodes;
     if (y.nodes === undefined) y.nodes = elements[y.element_id].nodes;
     if (x.value < y.value) {
-      if (checkIfOneSameEdge(x.nodes, y.nodes)) {
+      if (checkIfArraysHaveOneSameElement(x.nodes, y.nodes)) {
         x.isViewPoint = false;
         y.isViewPoint = null;
       }
       return 1;
     }
     if (x.value > y.value) {
-      if (checkIfOneSameEdge(x.nodes, y.nodes)) {
+      if (checkIfArraysHaveOneSameElement(x.nodes, y.nodes)) {
         x.isViewPoint = null;
         y.isViewPoint = false;
       }
@@ -41,7 +38,7 @@ function findViewSpots(file, noOfViewpoints) {
     const face = values[index];
 
     if (face.isViewPoint == null) {
-      // assume the next highets face is a ViewPoint. It will be changed to no Viewport,
+      // assume the next highest face is a ViewPoint. It will be changed to isViewPoint=false,
       // if we find in the inner loop a bigger, connecting face, that is already no Viewport
       face.isViewPoint = true;
       foundViewpoints++;
@@ -51,15 +48,17 @@ function findViewSpots(file, noOfViewpoints) {
         if (indexCompare !== index) {
           const faceToCompare = values[indexCompare];
 
-          if (checkIfOneSameEdge(faceToCompare.nodes, face.nodes)) {
-            // If our compared face is bigger (:=index is smaller) than our actual face
-            // and they have a node in common, the actual face is no VP
+          if (
+            checkIfArraysHaveOneSameElement(faceToCompare.nodes, face.nodes)
+          ) {
+            // If the faceToCompare is bigger (:=index is smaller) than our actual face
+            // and they have a node in common, the actual face is no ViewPoint
             if (face.isViewPoint && indexCompare < index) {
               face.isViewPoint = false;
               foundViewpoints--;
             }
-            // If our compared face is smaller (:=index is higher) than our actual face
-            // and they have a node in common, the compared face is no VP
+            // If our faceToCompare is smaller (:=index is higher) than our actual face
+            // and they have a node in common, the faceToCompare is no ViewPoint
             if (indexCompare > index) {
               faceToCompare.isViewPoint = false;
             }
@@ -70,7 +69,7 @@ function findViewSpots(file, noOfViewpoints) {
   }
 
   // filter the results to only show faces, that are a ViewPoint and
-  // remove the keys "isViewPoint" and "nodes"
+  // remove the keys "isViewPoint" and "nodes" to match the requirements
   const result = values.filter((value) => value.isViewPoint === true);
   result.forEach((element) => {
     delete element.isViewPoint;
@@ -80,12 +79,14 @@ function findViewSpots(file, noOfViewpoints) {
   return result;
 }
 
-const file = process.argv[2];
-const noOfViewpoints = process.argv[3];
+try {
+  // read the values from the calling command
+  const fileName = process.argv[2];
+  const noOfViewpoints = parseInt(process.argv[3]);
 
-const start = Date.now();
-
-const result = findViewSpots(file, parseInt(noOfViewpoints));
-console.log(result);
-const end = Date.now();
-console.log(`Execution time: ${end - start} ms`);
+  // read our data from our file
+  const data = require(fileName);
+  // calculate first n ViewPoints
+  const result = findViewSpots(data, noOfViewpoints);
+  console.log(result);
+} catch (error) {}
