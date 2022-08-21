@@ -29,6 +29,7 @@ function findViewSpots(file, noOfViewpoints) {
     index++
   ) {
     const face = values[index];
+
     if (face.isViewPoint == null) {
       // assume the next highets face is a ViewPoint. It will be changed to no Viewport,
       // if we find in the inner loop a bigger, connecting face, that is already no Viewport
@@ -81,7 +82,7 @@ function findViewSpots(file, noOfViewpoints) {
 
 const start = Date.now();
 
-// const result = findViewSpots("./data/mesh.json", 5);
+// const result = findViewSpots("./data/mesh.json", 10);
 const result = findViewSpots("./data/mesh_x_sin_cos_20000.json", 15);
 console.log(result);
 
