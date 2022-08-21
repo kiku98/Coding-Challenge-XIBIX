@@ -1,5 +1,5 @@
 function findViewSpots(data, noOfViewpoints) {
-  const values = data.values;
+  const faces = data.values;
   const elements = data.elements;
 
   let foundViewpoints = 0;
@@ -7,9 +7,9 @@ function findViewSpots(data, noOfViewpoints) {
   function checkIfArraysHaveOneSameElement(x, y) {
     return x.includes(y[0]) || x.includes(y[1]) || x.includes(y[2]);
   }
-  // sort all values descending regarding their height and append its nodes
+  // sort all faces descending regarding their height and append its nodes
   // and the isViewPort property
-  values.sort(function (x, y) {
+  faces.sort(function (x, y) {
     if (x.nodes === undefined) x.nodes = elements[x.element_id].nodes;
     if (y.nodes === undefined) y.nodes = elements[y.element_id].nodes;
     if (x.value < y.value) {
@@ -32,10 +32,10 @@ function findViewSpots(data, noOfViewpoints) {
   // iterate over all sorted faces
   for (
     let index = 0;
-    index < values.length && foundViewpoints !== noOfViewpoints;
+    index < faces.length && foundViewpoints !== noOfViewpoints;
     index++
   ) {
-    const face = values[index];
+    const face = faces[index];
 
     if (face.isViewPoint == null) {
       // assume the next highest face is a ViewPoint. It will be changed to isViewPoint=false,
@@ -44,9 +44,9 @@ function findViewSpots(data, noOfViewpoints) {
       foundViewpoints++;
 
       // loop through all faces to compare them to the actual
-      for (let indexCompare = 0; indexCompare < values.length; indexCompare++) {
+      for (let indexCompare = 0; indexCompare < faces.length; indexCompare++) {
         if (indexCompare !== index) {
-          const faceToCompare = values[indexCompare];
+          const faceToCompare = faces[indexCompare];
 
           if (
             checkIfArraysHaveOneSameElement(faceToCompare.nodes, face.nodes)
@@ -70,7 +70,7 @@ function findViewSpots(data, noOfViewpoints) {
 
   // filter the results to only show faces, that are a ViewPoint and
   // remove the keys "isViewPoint" and "nodes" to match the requirements
-  const result = values.filter((value) => value.isViewPoint === true);
+  const result = faces.filter((value) => value.isViewPoint === true);
   result.forEach((element) => {
     delete element.isViewPoint;
     delete element.nodes;
