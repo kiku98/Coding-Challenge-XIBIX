@@ -41,6 +41,7 @@ function findViewSpots(file) {
   const result = values.filter((value) => value.isViewPoint === true);
   result.forEach((element) => delete element.isViewPoint);
   console.log(result);
+  console.log(result.length);
 }
 
 const start = Date.now();
